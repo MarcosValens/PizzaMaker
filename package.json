@@ -1,0 +1,48 @@
+{
+  "name": "pizzamaker",
+  "version": "1.0.0",
+  "description": "App para pedir pizzas online",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "webpack": "webpack --mode production",
+    "build": "webpack --config webpack.config.js -p",
+    "start": "webpack-dev-server --mode development"
+  },
+  "keywords": [
+    "pizza",
+    "maker",
+    "online"
+  ],
+  "author": "Marcos Valens Fraile",
+  "license": "ISC",
+  "dependencies": {},
+  "devDependencies": {
+    "autoprefixer": "^9.4.7",
+    "babel-core": "^6.26.3",
+    "babel-loader": "^7.1.5",
+    "babel-plugin-transform-object-assign": "^6.22.0",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-es2015": "^6.24.1",
+    "css-loader": "^1.0.1",
+    "extract-loader": "^3.0.0",
+    "file-loader": "^2.0.0",
+    "html-webpack-plugin": "^3.2.0",
+    "node-sass": "^4.10.0",
+    "postcss-loader": "^3.0.0",
+    "sass-loader": "^7.1.0",
+    "style-loader": "^0.23.1",
+    "terser-webpack-plugin": "^1.2.1",
+    "uglify-es": "github:mishoo/UglifyJS2#harmony",
+    "uglifyjs-webpack-plugin": "^2.1.1",
+    "vue": "^2.5.22",
+    "vue-loader": "^15.6.2",
+    "vue-template-compiler": "^2.5.22",
+    "webpack": "^4.29.0",
+    "webpack-cli": "^3.2.1",
+    "webpack-dev-server": "^3.1.14"
+  },
+  "resolutions": {
+    "terser": "3.14.1"
+  }
+}
