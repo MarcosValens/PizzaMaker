@@ -52,27 +52,30 @@ module.exports = {
             {
                 test: /\.scss$/,
                 use: [
-                    {
-                        loader: 'file-loader',
-                        options: {
-                            outputPath: 'css',
-                            name: 'bundle.css',
-                        },
-                    },
-                    {loader: 'extract-loader'},
-                    {loader: 'css-loader'},
-                    {
-                        loader: 'postcss-loader',
-                        options: {
-                            plugins: () => [autoprefixer()],
-                        },
-                    },
-                    {
-                        loader: 'sass-loader',
-                        options: {
-                            includePaths: ['./node_modules'],
-                        },
-                    }
+                    "style-loader",
+                    "css-loader",
+                    "sass-loader",
+                    /*{
+                         loader: 'file-loader',
+                         options: {
+                             outputPath: 'css',
+                             name: 'bundle.css',
+                         },
+                     },
+                     {loader: 'extract-loader'},
+                     {loader: 'css-loader'},
+                     {
+                         loader: 'postcss-loader',
+                         options: {
+                             plugins: () => [autoprefixer()],
+                         },
+                     },
+                     {
+                         loader: 'sass-loader',
+                         options: {
+                             includePaths: ['./node_modules'],
+                         },
+                     },*/
                 ],
             },
             {

@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "webpack": "webpack --mode production",
+    "webpack": "webpack --mode development",
     "build": "webpack --config webpack.config.js -p",
     "start": "webpack-dev-server --mode development"
   },
@@ -16,7 +16,9 @@
   ],
   "author": "Marcos Valens Fraile",
   "license": "ISC",
-  "dependencies": {},
+  "dependencies": {
+    "vue-drag-drop": "^1.1.4"
+  },
   "devDependencies": {
     "autoprefixer": "^9.4.7",
     "babel-core": "^6.26.3",

@@ -1,1 +1,27 @@
-h1{color: green}
+* {
+  margin: 0;
+  padding: 0;
+}
+
+#wrapper-ingredients {
+  width: 50vw;
+  #base {
+    .ingredient-img {
+      width: 50%;
+      height: 60%;
+    }
+  }
+
+  #ingredients {
+    width: 60%;
+    div{
+      display: inline;
+      img {
+        width: 10%;
+        height: 20%;
+      }
+    }
+
+  }
+}
+

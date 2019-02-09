@@ -1,6 +1,7 @@
 import Vue from 'vue'
-import app from '../components/app.vue'
+import pizzaMaker from '../components/pizza-maker.vue'
+
 
 new Vue({
-    render: h => h(app)
-}).$mount('#app')
+    render: h => h(pizzaMaker)
+}).$mount('#pizza-maker')
