@@ -13,29 +13,29 @@
             </div>
 
             <div id="ingredients">
-                <drag class="drag" :transfer-data="bellpepper" :image-x-offset=-50 :image-y-offset=100>
+                <drag class="drag" :transfer-data="bellpepper">
                     <img src="../img/bellpepper-512.png" id="bellpepper" alt="pimiento amarillo" width="512"
                          height="512">
                 </drag>
-                <drag class="drag" :transfer-data="cheese" :image-x-offset=-50 :image-y-offset=100>
+                <drag class="drag" :transfer-data="cheese">
                     <img src="../img/cheese-512.png" alt="queso" width="512" height="512">
                 </drag>
-                <drag class="drag" :transfer-data="corn" :image-x-offset=-50 :image-y-offset=100>
+                <drag class="drag" :transfer-data="corn">
                     <img src="../img/corn-512.png" alt="maiz" width="512" height="512">
                 </drag>
-                <drag class="drag" :transfer-data="mushroom" :image-x-offset=-50 :image-y-offset=100>
+                <drag class="drag" :transfer-data="mushroom">
                     <img src="../img/mushroom-512.png" alt="seta" width="512" height="512">
                 </drag>
-                <drag class="drag" :transfer-data="olive" :image-x-offset=-50 :image-y-offset=100>
+                <drag class="drag" :transfer-data="olive">
                     <img src="../img/olive-512.png" alt="oliva" width="512" height="512">
                 </drag>
-                <drag class="drag" :transfer-data="onion" :image-x-offset=-50 :image-y-offset=100>
+                <drag class="drag" :transfer-data="onion">
                     <img src="../img/onion-512.png" alt="cebolla" width="512" height="512">
                 </drag>
-                <drag class="drag" :transfer-data="pepperoni" :image-x-offset=-50 :image-y-offset=100>
+                <drag class="drag" :transfer-data="pepperoni">
                     <img src="../img/pepperoni-512.png" alt="pepperoni" width="512" height="512">
                 </drag>
-                <drag class="drag" :transfer-data="tomato" :image-x-offset=-50 :image-y-offset=100>
+                <drag class="drag" :transfer-data="tomato">
                     <img src="../img/tomato-512.png" alt="tomate" width="512" height="512">
                 </drag>
             </div>
@@ -59,6 +59,7 @@
     import {Pepperoni} from "../model/Pepperoni.js"
     import {Tomato} from "../model/Tomato.js"
     import {Drag, Drop} from 'vue-drag-drop'
+
     export default {
         components: {Drag, Drop},
         data() {
@@ -81,6 +82,7 @@
                 let y = event.clientY
                 let img = document.createElement("img")
                 img.setAttribute('src', data.img)
+                img.setAttribute('name', data.name)
                 img.style.position = 'absolute'
                 img.style.width = '3.5%'
                 img.style.height = '7%'
@@ -88,19 +90,42 @@
                 img.style.top = y - img.offsetHeight / 2 - 25 + 'px'
                 img.style.zIndex = '1'
                 document.querySelector('#pizza-base').appendChild(img)
-                /*this.ingredientsReceipt[data.name] = (this.ingredientsReceipt[data.name] || 0) + 1*/
-                if(this.ingredientsReceipt.indexOf(data) === -1){
+                if (this.ingredientsReceipt.indexOf(data) === -1) {
                     this.ingredientsReceipt.push(data)
                 } else {
-                    data.quantity++
+                    let ingredient = this.ingredientsReceipt.filter(arrayItem =>
+                        arrayItem.name === data.name
+                    )
+                    ingredient[0].quantity++
                 }
-               img.addEventListener("click", x => {
-                   if (this.ingredientsReceipt.quantity > 0){
-                       console.log(this.ingredientsReceipt[data].quantity)
-                       this.ingredientsReceipt.quantity--
-                   } /*else {this.remove()}*/console.log(this.ingredientsReceipt,data)
 
-               })
+                //NO PINTA LAS LISTAS
+
+                /*
+                this.ingredientsReceipt[data.name] = (this.ingredientsReceipt[data.name] || 0) + 1
+                if (this.ingredientsReceipt[data.name] !== data) {
+                    this.ingredientsReceipt[data.name] = data
+                } else {
+                    this.ingredientsReceipt[data.name].quantity++
+
+                }
+                */
+                img.addEventListener("click", () => {
+                    let ingredient = this.ingredientsReceipt.filter(arrayItem => arrayItem.name === data.name)
+                    if (ingredient[0].quantity > 1) {
+                        ingredient[0].quantity--
+                        img.remove()
+
+                    } else {
+                        img.remove()
+                        ingredient[0].quantity--
+                        let index = this.ingredientsReceipt.indexOf(data);
+                        if (index > -1) {
+                            this.ingredientsReceipt.splice(index, 1);
+                        }
+                    }
+                })
+
             },
         },
         created() {
