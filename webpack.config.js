@@ -12,7 +12,7 @@ module.exports = {
         ],
     },
     mode: "development",
-    entry: ['./src/js/vue_loader.js','./src/js/style_loader.js','./src/js/js_loader.js'],
+    entry: ['@babel/polyfill','./src/js/vue_loader.js','./src/js/style_loader.js'],
     output: {
         filename: './js/bundle.js',
         path: path.resolve(__dirname, 'dist')

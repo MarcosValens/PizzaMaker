@@ -2,7 +2,7 @@
     <div>
         <div id="wrapper-ingredients">
             <div id="base">
-                <img src="../img/base.svg" usemap="#image-map" alt="base">
+                <img id="base-img" src="../img/base.svg" usemap="#image-map" alt="base">
                 <drop id="pizza-base" @drop="handleDrop">
                     <map name="image-map" id="image-map">
                         <area target="_self" alt="pizza-base" title="pizza-base"
@@ -11,7 +11,6 @@
                     </map>
                 </drop>
             </div>
-
             <div id="ingredients">
                 <drag class="drag" :transfer-data="bellpepper">
                     <img src="../img/bellpepper-512.png" id="bellpepper" alt="pimiento amarillo" width="512"
@@ -45,6 +44,11 @@
                 <li v-for="ingRec in ingredientsReceipt">{{ingRec.name + " X " + ingRec.quantity}}</li>
             </ul>
         </div>
+        <button @click="say()">Play</button>
+        <button @click="deleteAll()">Eliminar todos los ingredientes</button>
+        <button @click="deleteOne()">Eliminar el ultimo ingrediente añadido</button>
+        <button id="rec">Grabar</button>
+        <button id="stop">Stop</button>
     </div>
 </template>
 
@@ -58,6 +62,7 @@
     import {Onion} from "../model/Onion.js"
     import {Pepperoni} from "../model/Pepperoni.js"
     import {Tomato} from "../model/Tomato.js"
+    import spoken from '../../node_modules/spoken/build/spoken.js'
     import {Drag, Drop} from 'vue-drag-drop'
 
     export default {
@@ -76,7 +81,95 @@
                 ticket: new Ticket()
             }
         },
+        computed: {
+            list: function () {
+                return this.ingRec.name + " X " + this.ingRec.quantity
+            }
+        },
         methods: {
+            switch(word) {
+                switch (word) {
+                    case "p":
+                    case "pimiento":
+                    case "pimientos":
+                        this.handleArray(this.bellpepper)
+                        break
+                    case "f":
+                    case "queso":
+                        this.handleArray(this.cheese)
+                        break
+                    case "c":
+                    case "cebolla":
+                        this.handleArray(this.onion)
+                        break
+                    case "b":
+                    case "maíz":
+                    case "maiz":
+                        this.handleArray(this.corn)
+                        break
+                    case "x":
+                    case "champiñones":
+                    case "setas":
+                        this.handleArray(this.mushroom)
+                        break
+                    case "o":
+                    case "aceitunas":
+                    case "oliva":
+                        this.handleArray(this.olive)
+                        break
+                    case "r":
+                    case "pepperoni":
+                        this.handleArray(this.pepperoni)
+                        break
+                    case "t":
+                    case "tomate":
+                        this.handleArray(this.tomato)
+                        break
+                    default:
+                        break
+                }
+            },
+            async sendAudio(blob) {
+                let formData = new FormData()
+                formData.append('arxiu', blob)
+                let postAudio = await fetch("http://35.194.72.13/pizzamaker/backend.php", {
+                    method: 'POST',
+                    body: formData,
+                })
+                return await postAudio.json()
+            },
+            deleteOne() {
+                let images = Array.prototype.slice.call(document.querySelectorAll('#pizza-base img'))
+                if (this.ingredientsReceipt[this.ingredientsReceipt.length - 1].quantity > 1) {
+                    this.ingredientsReceipt[this.ingredientsReceipt.length - 1].quantity--
+                } else this.ingredientsReceipt.pop()
+                let img = images.pop()
+                document.querySelector('#pizza-base').removeChild(img)
+
+            },
+            deleteAll() {
+                this.ingredientsReceipt = []
+                let images = Array.prototype.slice.call(document.querySelectorAll('#pizza-base img'))
+                images.forEach(img => document.getElementById('pizza-base').removeChild(img))
+            },
+            say() {
+                this.ingredientsReceipt.forEach(ingredient => spoken.say(ingredient.quantity
+                    + ' de ' + ingredient.name)/*.then(speech => {
+                    spoken.listen().then(transcript =>
+                        console.log("Answer: " + transcript))
+                })*/)
+
+            },
+            handleArray(obj) {
+                if (this.ingredientsReceipt.indexOf(obj) === -1) {
+                    this.ingredientsReceipt.push(obj)
+                } else {
+                    let ingredient = this.ingredientsReceipt.filter(arrayItem =>
+                        arrayItem.name === obj.name
+                    )
+                    ingredient[0].quantity++
+                }
+            },
             handleDrop(data) {
                 let x = event.clientX
                 let y = event.clientY
@@ -90,14 +183,7 @@
                 img.style.top = y - img.offsetHeight / 2 - 25 + 'px'
                 img.style.zIndex = '1'
                 document.querySelector('#pizza-base').appendChild(img)
-                if (this.ingredientsReceipt.indexOf(data) === -1) {
-                    this.ingredientsReceipt.push(data)
-                } else {
-                    let ingredient = this.ingredientsReceipt.filter(arrayItem =>
-                        arrayItem.name === data.name
-                    )
-                    ingredient[0].quantity++
-                }
+                this.handleArray(data)
 
                 //NO PINTA LAS LISTAS
 
@@ -110,6 +196,7 @@
 
                 }
                 */
+
                 img.addEventListener("click", () => {
                     let ingredient = this.ingredientsReceipt.filter(arrayItem => arrayItem.name === data.name)
                     if (ingredient[0].quantity > 1) {
@@ -118,18 +205,47 @@
 
                     } else {
                         img.remove()
-                        ingredient[0].quantity--
-                        let index = this.ingredientsReceipt.indexOf(data);
+                        let index = this.ingredientsReceipt.indexOf(data)
                         if (index > -1) {
-                            this.ingredientsReceipt.splice(index, 1);
+                            this.ingredientsReceipt.splice(index, 1)
                         }
                     }
                 })
-
             },
         },
         created() {
 
+        },
+        mounted: function () {
+            navigator.mediaDevices.getUserMedia({audio: true})
+                .then(stream => {
+                    const mediaRecorder = new MediaRecorder(stream)
+                    let audioChunks = []
+
+                    document.getElementById('rec').addEventListener("click", () => {
+                        mediaRecorder.start()
+                    })
+                    document.getElementById('stop').addEventListener("click", () => {
+                        mediaRecorder.stop()
+                    })
+                    mediaRecorder.ondataavailable = (ev) => {
+                        audioChunks.push(ev.data)
+                    }
+                    mediaRecorder.onstop = async () => {
+                        let blob = new Blob(audioChunks)
+                        audioChunks = []
+                        let trasncriptedAudio = await this.sendAudio(blob)
+                        if (trasncriptedAudio[0].confianca > 0.8) {
+                            let arrayTranscripcio = trasncriptedAudio[0].transcripcio.split(' ')
+                            arrayTranscripcio.forEach(word => {
+                                this.switch(word)
+                            })
+                        }
+                    }
+                })
+            document.addEventListener('keydown', (event) => {
+                this.switch(event.key)
+            })
         }
     }
 </script>
