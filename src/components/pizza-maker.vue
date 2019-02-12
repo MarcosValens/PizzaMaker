@@ -40,15 +40,51 @@
             </div>
         </div>
         <div id="wrapper-ticket">
-            <ul>
-                <li v-for="ingRec in ingredientsReceipt">{{ingRec.name + " X " + ingRec.quantity}}</li>
-            </ul>
+            <table v-if="ticket.ingredients.length > 0">
+                <tr>
+                    <th>Nombre</th>
+                    <th>Cantidad</th>
+                    <th>Precio</th>
+                    <th>SubTotal</th>
+                    <th>TOTAL</th>
+                </tr>
+                <tr v-for="ingRec in ticket.ingredients" :key="ingRec.name">
+                    <td>
+                        {{ingRec.name}}
+                    </td>
+                    <td>
+                        {{ingRec.quantity}}
+                    </td>
+                    <td>
+                        {{ingRec.price}}
+                    </td>
+                    <td>
+                        {{ingRec.quantity*ingRec.price}}
+                    </td>
+                    <td></td>
+                    <td>
+                        <button @click="deleteOne()">Eliminar uno</button>
+                    </td>
+                    <td>
+                        <button @click="deleteIng(ingRec)">Eliminar</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>
+                        {{total}}
+                    </td>
+                </tr>
+            </table>
         </div>
-        <button @click="say()">Play</button>
+        <button @click="say()">Play audio</button>
+        <button @click="shutUp()">Stop audio</button>
         <button @click="deleteAll()">Eliminar todos los ingredientes</button>
-        <button @click="deleteOne()">Eliminar el ultimo ingrediente añadido</button>
         <button id="rec">Grabar</button>
-        <button id="stop">Stop</button>
+        <button id="stop">Stop grabación</button>
     </div>
 </template>
 
@@ -62,28 +98,33 @@
     import {Onion} from "../model/Onion.js"
     import {Pepperoni} from "../model/Pepperoni.js"
     import {Tomato} from "../model/Tomato.js"
-    import spoken from '../../node_modules/spoken/build/spoken.js'
     import {Drag, Drop} from 'vue-drag-drop'
 
     export default {
         components: {Drag, Drop},
         data() {
             return {
-                ingredientsReceipt: [],
-                bellpepper: new Bellpepper(2),
-                cheese: new Cheese(3),
-                corn: new Corn(1),
-                mushroom: new Mushroom(2),
-                olive: new Olive(3),
-                onion: new Onion(4),
-                pepperoni: new Pepperoni(5),
-                tomato: new Tomato(6),
-                ticket: new Ticket()
+                bellpepper: new Bellpepper(),
+                cheese: new Cheese(),
+                corn: new Corn(),
+                mushroom: new Mushroom(),
+                olive: new Olive(),
+                onion: new Onion(),
+                pepperoni: new Pepperoni(),
+                tomato: new Tomato(),
+                ticket: new Ticket(),
+                synth: window.speechSynthesis
             }
         },
         computed: {
-            list: function () {
-                return this.ingRec.name + " X " + this.ingRec.quantity
+            total: function () {
+                let total = 0
+                this.ticket.ingredients.forEach(ing => {
+                    ing.subTotal = ing.quantity * ing.price
+                    total += ing.subTotal
+                    this.ticket.total = total
+                })
+                return this.ticket.total
             }
         },
         methods: {
@@ -93,37 +134,45 @@
                     case "pimiento":
                     case "pimientos":
                         this.handleArray(this.bellpepper)
+                        this.createImg(null, null, this.bellpepper)
                         break
                     case "f":
                     case "queso":
                         this.handleArray(this.cheese)
+                        this.createImg(null, null, this.cheese)
                         break
                     case "c":
                     case "cebolla":
                         this.handleArray(this.onion)
+                        this.createImg(null, null, this.onion)
                         break
                     case "b":
                     case "maíz":
                     case "maiz":
                         this.handleArray(this.corn)
+                        this.createImg(null, null, this.corn)
                         break
                     case "x":
                     case "champiñones":
                     case "setas":
                         this.handleArray(this.mushroom)
+                        this.createImg(null, null, this.mushroom)
                         break
                     case "o":
                     case "aceitunas":
                     case "oliva":
                         this.handleArray(this.olive)
+                        this.createImg(null, null, this.olive)
                         break
                     case "r":
                     case "pepperoni":
                         this.handleArray(this.pepperoni)
+                        this.createImg(null, null, this.pepperoni)
                         break
                     case "t":
                     case "tomate":
                         this.handleArray(this.tomato)
+                        this.createImg(null, null, this.tomato)
                         break
                     default:
                         break
@@ -140,31 +189,37 @@
             },
             deleteOne() {
                 let images = Array.prototype.slice.call(document.querySelectorAll('#pizza-base img'))
-                if (this.ingredientsReceipt[this.ingredientsReceipt.length - 1].quantity > 1) {
-                    this.ingredientsReceipt[this.ingredientsReceipt.length - 1].quantity--
-                } else this.ingredientsReceipt.pop()
+                console.log(images)
+                if (this.ticket.ingredients[this.ticket.ingredients.length - 1].quantity > 1) {
+                    this.ticket.ingredients[this.ticket.ingredients.length - 1].quantity--
+                } else this.ticket.ingredients.pop()
                 let img = images.pop()
                 document.querySelector('#pizza-base').removeChild(img)
 
             },
+            deleteIng(ing) {
+                let pos = this.ticket.ingredients.indexOf(ing)
+                this.ticket.ingredients.splice(pos, 1)
+            },
             deleteAll() {
-                this.ingredientsReceipt = []
+                this.ticket.ingredients = []
                 let images = Array.prototype.slice.call(document.querySelectorAll('#pizza-base img'))
                 images.forEach(img => document.getElementById('pizza-base').removeChild(img))
             },
             say() {
-                this.ingredientsReceipt.forEach(ingredient => spoken.say(ingredient.quantity
-                    + ' de ' + ingredient.name)/*.then(speech => {
-                    spoken.listen().then(transcript =>
-                        console.log("Answer: " + transcript))
-                })*/)
-
+                this.ticket.ingredients.forEach(ingredient => {
+                    let speak = new SpeechSynthesisUtterance(ingredient.quantity + " de " + ingredient.name)
+                    this.synth.speak(speak)
+                })
+            },
+            shutUp() {
+                this.synth.cancel()
             },
             handleArray(obj) {
-                if (this.ingredientsReceipt.indexOf(obj) === -1) {
-                    this.ingredientsReceipt.push(obj)
+                if (this.ticket.ingredients.indexOf(obj) === -1) {
+                    this.ticket.ingredients.push(obj)
                 } else {
-                    let ingredient = this.ingredientsReceipt.filter(arrayItem =>
+                    let ingredient = this.ticket.ingredients.filter(arrayItem =>
                         arrayItem.name === obj.name
                     )
                     ingredient[0].quantity++
@@ -173,46 +228,40 @@
             handleDrop(data) {
                 let x = event.clientX
                 let y = event.clientY
+                this.handleArray(data)
+                this.createImg(x, y, data)
+            },
+            createImg(x, y, data) {
+
                 let img = document.createElement("img")
                 img.setAttribute('src', data.img)
                 img.setAttribute('name', data.name)
-                img.style.position = 'absolute'
-                img.style.width = '3.5%'
-                img.style.height = '7%'
-                img.style.left = x - img.offsetWidth / 2 - 50 + 'px'
-                img.style.top = y - img.offsetHeight / 2 - 25 + 'px'
-                img.style.zIndex = '1'
-                document.querySelector('#pizza-base').appendChild(img)
-                this.handleArray(data)
+                img.setAttribute('class', 'ingredient')
 
-                //NO PINTA LAS LISTAS
-
-                /*
-                this.ingredientsReceipt[data.name] = (this.ingredientsReceipt[data.name] || 0) + 1
-                if (this.ingredientsReceipt[data.name] !== data) {
-                    this.ingredientsReceipt[data.name] = data
+                if (x !== null && y !== null) {
+                    img.style.left = x - img.offsetWidth / 2 + 'px'
+                    img.style.top = y - img.offsetHeight / 2 + 'px'
                 } else {
-                    this.ingredientsReceipt[data.name].quantity++
-
+                    img.setAttribute('style', 'top:' + Math.floor(Math.random() * (275 - 50 + 1) + 50) + 'px;' +
+                        'left:' + Math.floor(Math.random() * (375 - 80 + 1) + 80) + 'px')
                 }
-                */
-
-                img.addEventListener("click", () => {
-                    let ingredient = this.ingredientsReceipt.filter(arrayItem => arrayItem.name === data.name)
+                document.querySelector('#pizza-base').appendChild(img)
+                img.addEventListener("dblclick", () => {
+                    let ingredient = this.ticket.ingredients.filter(arrayItem => arrayItem.name === data.name)
                     if (ingredient[0].quantity > 1) {
                         ingredient[0].quantity--
                         img.remove()
-
                     } else {
                         img.remove()
-                        let index = this.ingredientsReceipt.indexOf(data)
+                        let index = this.ticket.ingredients.indexOf(data)
                         if (index > -1) {
-                            this.ingredientsReceipt.splice(index, 1)
+                            this.ticket.ingredients.splice(index, 1)
                         }
                     }
                 })
             },
         },
+
         created() {
 
         },
@@ -243,7 +292,7 @@
                         }
                     }
                 })
-            document.addEventListener('keydown', (event) => {
+            document.addEventListener('keyup', (event) => {
                 this.switch(event.key)
             })
         }

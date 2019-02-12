@@ -1,4 +1,4 @@
-export function Ticket(total,ingredients) {
-    this.total = total
-    this.ingredients = ingredients
+export function Ticket() {
+    this.total = 0
+    this.ingredients = []
 }
