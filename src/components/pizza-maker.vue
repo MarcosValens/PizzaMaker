@@ -1,5 +1,8 @@
 <template>
     <div>
+        <div>
+            <a href="pizza-list.html">Nuestras Pizzas</a>
+        </div>
         <div id="wrapper-ingredients">
             <div id="base">
                 <img id="base-img" src="../img/base.svg" usemap="#image-map" alt="base">
@@ -63,7 +66,7 @@
                     </td>
                     <td></td>
                     <td>
-                        <button @click="deleteOne()">Eliminar uno</button>
+                        <button @click="deleteOne(ingRec)">Eliminar uno</button>
                     </td>
                     <td>
                         <button @click="deleteIng(ingRec)">Eliminar</button>
@@ -187,18 +190,31 @@
                 })
                 return await postAudio.json()
             },
-            deleteOne() {
+            deleteOne(ing) {
                 let images = Array.prototype.slice.call(document.querySelectorAll('#pizza-base img'))
-                console.log(images)
-                if (this.ticket.ingredients[this.ticket.ingredients.length - 1].quantity > 1) {
-                    this.ticket.ingredients[this.ticket.ingredients.length - 1].quantity--
-                } else this.ticket.ingredients.pop()
-                let img = images.pop()
-                document.querySelector('#pizza-base').removeChild(img)
-
+                let imgRmv = images.filter(img => img.id === ing.ids[ing.ids.length - 1])
+                document.querySelector('#pizza-base').removeChild(imgRmv[0])
+                if (ing.quantity > 1) {
+                    ing.ids.pop()
+                    ing.quantity--
+                    let x = this.ticket.ingredients.indexOf(ing)
+                    if (x !== -1) {
+                        this.ticket.ingredients[x] = ing
+                    }
+                } else {
+                    let pos = this.ticket.ingredients.indexOf(ing)
+                    this.ticket.ingredients.splice(pos, 1)
+                }
             },
             deleteIng(ing) {
+                let images = Array.prototype.slice.call(document.querySelectorAll('#pizza-base img'))
+                images.forEach(img => {
+                    if (img.id.indexOf(ing.name) !== -1) {
+                        document.querySelector('#pizza-base').removeChild(img)
+                    }
+                })
                 let pos = this.ticket.ingredients.indexOf(ing)
+                this.ticket.ingredients[pos].quantity = 1
                 this.ticket.ingredients.splice(pos, 1)
             },
             deleteAll() {
@@ -232,18 +248,20 @@
                 this.createImg(x, y, data)
             },
             createImg(x, y, data) {
-
+                let id = Math.floor(Math.random() * (275 - 50 + 1) + 50).toString() +
+                    Math.floor(Math.random() * (375 - 80 + 1) + 80).toString()
+                data.ids.push(data.name + id)
                 let img = document.createElement("img")
                 img.setAttribute('src', data.img)
                 img.setAttribute('name', data.name)
                 img.setAttribute('class', 'ingredient')
-
+                img.setAttribute('id', data.name + id)
                 if (x !== null && y !== null) {
                     img.style.left = x - img.offsetWidth / 2 + 'px'
                     img.style.top = y - img.offsetHeight / 2 + 'px'
                 } else {
-                    img.setAttribute('style', 'top:' + Math.floor(Math.random() * (275 - 50 + 1) + 50) + 'px;' +
-                        'left:' + Math.floor(Math.random() * (375 - 80 + 1) + 80) + 'px')
+                    img.setAttribute('style', 'top:' + Math.floor(Math.random() * (350 - 50 + 1) + 50) + 'px;' +
+                        'left:' + Math.floor(Math.random() * (460 - 100 + 1) + 100) + 'px')
                 }
                 document.querySelector('#pizza-base').appendChild(img)
                 img.addEventListener("dblclick", () => {

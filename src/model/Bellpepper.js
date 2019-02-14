@@ -4,4 +4,5 @@ export function Bellpepper() {
     this.price = 0.5
     this.quantity = 1
     this.subTotal = this.price*this.quantity
+    this.ids = []
 }
