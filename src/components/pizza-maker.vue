@@ -1,8 +1,6 @@
 <template>
     <div>
-        <div>
-            <a href="pizza-list.html">Nuestras Pizzas</a>
-        </div>
+        <a href="../pizza-list.html">Nuestras Pizzas</a>
         <div id="wrapper-ingredients">
             <div id="base">
                 <img id="base-img" src="../img/base.svg" usemap="#image-map" alt="base">
@@ -83,11 +81,16 @@
                 </tr>
             </table>
         </div>
-        <button @click="say()">Play audio</button>
-        <button @click="shutUp()">Stop audio</button>
-        <button @click="deleteAll()">Eliminar todos los ingredientes</button>
-        <button id="rec">Grabar</button>
-        <button id="stop">Stop grabación</button>
+        <div>
+            <button @click="say()">Play audio</button>
+            <button @click="shutUp()">Stop audio</button>
+            <button @click="deleteAll()">Eliminar todos los ingredientes</button>
+            <button id="rec">Grabar</button>
+            <button id="stop">Stop grabación</button>
+        </div>
+        <div v-if="toogle === 1"><video controls></video></div>
+
+
     </div>
 </template>
 
@@ -104,7 +107,6 @@
     import {Drag, Drop} from 'vue-drag-drop'
 
     export default {
-        components: {Drag, Drop},
         data() {
             return {
                 bellpepper: new Bellpepper(),
@@ -116,9 +118,11 @@
                 pepperoni: new Pepperoni(),
                 tomato: new Tomato(),
                 ticket: new Ticket(),
-                synth: window.speechSynthesis
+                synth: window.speechSynthesis,
+                toogle: 0
             }
         },
+        components: {Drag, Drop},
         computed: {
             total: function () {
                 let total = 0
@@ -280,20 +284,34 @@
             },
         },
 
-        created() {
-
-        },
         mounted: function () {
-            navigator.mediaDevices.getUserMedia({audio: true})
+            let constraintObj = {
+                audio: true,
+                video: {
+                    facingMode: "user",
+                    width: {min: 640, ideal: 1280, max: 1920},
+                    height: {min: 480, ideal:720, max:1080}
+                }
+            }
+            navigator.mediaDevices.getUserMedia(constraintObj)
                 .then(stream => {
                     const mediaRecorder = new MediaRecorder(stream)
                     let audioChunks = []
 
-                    document.getElementById('rec').addEventListener("click", () => {
+                    document.getElementById('rec').addEventListener("click", async () => {
+                        let promise = new Promise(resolve => resolve(this.toogle=1))
+                        await promise
+                        let video = document.querySelector('video')
+                        if("srcObject" in video){
+                            video.srcObject = stream
+                        }
                         mediaRecorder.start()
+                        video.play()
                     })
                     document.getElementById('stop').addEventListener("click", () => {
                         mediaRecorder.stop()
+                        this.toogle = 0
+
                     })
                     mediaRecorder.ondataavailable = (ev) => {
                         audioChunks.push(ev.data)

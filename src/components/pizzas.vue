@@ -4,7 +4,8 @@
 
 <script>
     export default {
-        name: "scrapping"
+        name: "pizzas",
+
     }
 </script>
 

@@ -94,6 +94,10 @@ module.exports = {
         new VueLoaderPlugin(),
         new htmlWebpackPlugin({
             template: "./src/index.html"
+        }),
+        new htmlWebpackPlugin({
+            filename: 'pizza-list.html',
+            template: './src/pizza-list.html'
         })
     ]
 }
