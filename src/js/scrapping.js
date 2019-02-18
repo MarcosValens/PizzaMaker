@@ -19,7 +19,7 @@ function getPizzas() {
     var ing = Array.prototype.slice.call(document.querySelectorAll('div.col-lg-3.col-md-4.col-sm-6.col-xs-6 > a > div >  div > div > p'), function (x) {
         return x
     })
-    for (var i = 0; i < names.length-1; i++) {
+    for (var i = 0; i < names.length; i++) {
         var pizza = new Pizzas(names[i].innerHTML,imgs[i].src,ing[i].innerHTML)
         pizzaArray.push(pizza)
     }

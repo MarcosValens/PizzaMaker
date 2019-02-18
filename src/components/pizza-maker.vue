@@ -1,6 +1,6 @@
 <template>
     <div>
-        <a href="../pizza-list.html">Nuestras Pizzas</a>
+        <a href="./pizza-list.html">Nuestras Pizzas</a>
         <div id="wrapper-ingredients">
             <div id="base">
                 <img id="base-img" src="../img/base.svg" usemap="#image-map" alt="base">
@@ -88,7 +88,7 @@
             <button id="rec">Grabar</button>
             <button id="stop">Stop grabación</button>
         </div>
-        <div v-if="toogle === 1"><video controls></video></div>
+        <div v-if="toogle === 1"><video controls muted></video></div>
 
 
     </div>
@@ -261,8 +261,8 @@
                 img.setAttribute('class', 'ingredient')
                 img.setAttribute('id', data.name + id)
                 if (x !== null && y !== null) {
-                    img.style.left = x - img.offsetWidth / 2 + 'px'
-                    img.style.top = y - img.offsetHeight / 2 + 'px'
+                    img.style.left = x - img.offsetWidth / 2 - 25 + 'px'
+                    img.style.top = y - img.offsetHeight / 2 - 30 + 'px'
                 } else {
                     img.setAttribute('style', 'top:' + Math.floor(Math.random() * (350 - 50 + 1) + 50) + 'px;' +
                         'left:' + Math.floor(Math.random() * (460 - 100 + 1) + 100) + 'px')

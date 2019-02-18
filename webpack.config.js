@@ -96,7 +96,8 @@ module.exports = {
             template: "./src/index.html"
         }),
         new htmlWebpackPlugin({
-            filename: 'pizza-list.html',
+            filename:"pizza-list.html",
+            title: 'pizza-list',
             template: './src/pizza-list.html'
         })
     ]
